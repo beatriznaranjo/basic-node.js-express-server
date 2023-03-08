@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const port = 3001;
 const { v4: uuidv4 } = require("uuid");
 
 app.use(cors());
@@ -36,8 +35,8 @@ app.get("/movies", (req, res) => {
 });
 
 app.get("/movies/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const movie = movies.find((movie) => movie.id);
+  const id = req.params.id;
+  const movie = movies.find((movie) => movie.id === id);
   if (movie) {
     res.json(movie);
   } else {
@@ -53,6 +52,32 @@ app.post("/movies", (req, res) => {
   movie.id = uuidv4();
   movies.push(movie);
   res.json(movie);
+});
+
+app.put("/movies/:id", (req, res) => {
+  const id = req.params.id;
+  const updatedMovie = req.body;
+  const index = movies.findIndex((movie) => movie.id === id);
+  if (index === -1) {
+    return res.status(404).send("Movie not found");
+  }
+  const movie = movies[index];
+  movie.title = updatedMovie.title || movie.title;
+  movie.year = updatedMovie.year || movie.year;
+  movie.director = updatedMovie.director || movie.director;
+  movie.genre = updatedMovie.genre || movie.genre;
+  movies[index] = movie;
+  res.json(movie);
+});
+
+app.delete("/movies/:id", (req, res) => {
+  const id = req.params.id;
+  const index = movies.findIndex((movie) => movie.id === id);
+  if (index === -1) {
+    return res.status(404).send("Movie not found");
+  }
+  movies.splice(index, 1);
+  res.status(204).send();
 });
 
 const PORT = 3001;
